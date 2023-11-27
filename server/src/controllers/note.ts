@@ -7,12 +7,18 @@ export interface IncomingBody {
 }
 
 export const createNote: RequestHandler = async (req, res) => {
-  await Note.create<NoteDocument>({
+  const newNote = await Note.create<NoteDocument>({
     title: (req.body as IncomingBody).title,
     description: (req.body as IncomingBody).description,
   });
 
-  res.send("note created");
+  res.send({
+    note: {
+      id: newNote._id,
+      title: newNote.title,
+      description: newNote.description,
+    },
+  });
 };
 
 export const updateNote: RequestHandler = async (req, res) => {
@@ -29,7 +35,9 @@ export const updateNote: RequestHandler = async (req, res) => {
 
   if (!note) return res.json({ error: "Note not found !" });
 
-  res.send({ note });
+  res.send({
+    note: { id: note.id, title: note.title, description: note.description },
+  });
 };
 
 export const deleteNote: RequestHandler = async (req, res) => {
@@ -43,7 +51,15 @@ export const deleteNote: RequestHandler = async (req, res) => {
 
 export const getAllNotes: RequestHandler = async (req, res) => {
   const notes = await Note.find();
-  res.send({ notes });
+  res.send({
+    notes: notes.map((note) => {
+      return {
+        id: note._id,
+        title: note.title,
+        description: note.description,
+      };
+    }),
+  });
 };
 
 export const getSingleNote: RequestHandler = async (req, res) => {
